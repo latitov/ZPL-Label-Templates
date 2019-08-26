@@ -65,11 +65,11 @@ To make a template, you first need to design and create a label which looks just
 and make sure that it gets printed correctly. The label is created and edited either directly in ZPL code,
 or using some kind of designer app.
 
-Heres a great tool to do it on-line:
+The great tool to do it on-line:
 
 * [Online ZPL Emulator](http://labelary.com/viewer.html)
 
-You go there and design you label, and it looks like this:
+You go there and design you label:
 
 ![](labelary-viewer.png)
 
@@ -85,8 +85,10 @@ Get your ZPL code, and save it to a file, with .templ suffix. Let's say this was
 	^FO100,550^BC^FD12345678^FS
 	^XZ
 
+![](bc1.png)
+
 __Important__.
-It's not a template yet. To make it a template, we must reference a variable from the rpogram in it.
+It's not a template yet. To make it a template, we must reference a variable from the program in it.
 The syntax for variables is this:
 
 	{{.VariableName}}
@@ -98,8 +100,6 @@ we can encode it in a template this way:
 	^BY5,2,270
 	^FO100,550^BC^FD{{.ItemID}}^FS
 	^XZ
-
-![](bc1.png)
 
 What happened? The "12345678" was replaced with {{.ItemID}}. From now on, the program will substitute
 that with actual ItemID.
