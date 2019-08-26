@@ -1,0 +1,226 @@
+<nav>
+<ul>
+<li><a href="#toc_0">Xenops v1.12 / ZPL Label Templates System / User&rsquo;s Guide</a>
+<ul>
+<li><a href="#toc_1">Abstract</a></li>
+<li><a href="#toc_2">What is ZPL</a></li>
+<li><a href="#toc_3">How to design a custom label</a></li>
+<li><a href="#toc_4">How to make it a template</a></li>
+<li><a href="#toc_5">How the Planchet app can aggregate database fields</a></li>
+<li><a href="#toc_6">The end</a></li>
+</ul></li>
+</ul>
+</nav>
+
+<h1 id="toc_0">Xenops v1.12 / ZPL Label Templates System / User&rsquo;s Guide</h1>
+
+<p>Copyright &copy; 2019 Leonid Titov, All rights reserved</p>
+
+<h2 id="toc_1">Abstract</h2>
+
+<p>The template system allows to plug in into the system different ZPL labels, edit them,
+without any modification of software which does the printing.</p>
+
+<p>The architecture is:</p>
+
+<p><img src="draw1.png" alt="" /></p>
+
+<p>In other words, again:</p>
+
+<p><img src="draw2.png" alt="" /></p>
+
+<p>So we have:</p>
+
+<ol>
+<li>Data in Database</li>
+<li>Template file</li>
+<li>The program which fills template with data, and sends it to printer</li>
+</ol>
+
+<h2 id="toc_2">What is ZPL</h2>
+
+<p>ZPL is Zebra Programming Language. Zebra Programming Language (ZPL and ZPL II) is a label
+description language from Zebra Technologies. It is used primarily for labeling applications.
+The original ZPL was advanced to ZPL II, but a full compatibility with the older version is not given.
+Meanwhile, ZPL II is emulated by many label printers of various producers.</p>
+
+<p>The language commands always start with a caret (&lsquo;^&rsquo;) or tilde sign (&rsquo;~&lsquo;). Currently, more than
+170 commands exist in ZPL II. Each format has to start with the command ^XA and end with ^XZ.
+For instance, the font size is sent to the printer with the ^ADN,n,m command, where n and m are
+integers denoting the font size and spacing characteristics; ^ADN,18,10 is the smallest size and
+^ADN,180,100 the largest.</p>
+
+<p>A simple output displaying the text &ldquo;Wikipedia&rdquo; can be made using code like below.</p>
+
+<pre><code>^XA
+^LH30,30
+^FO20,10
+^ADN,90,50
+^FDWikipedia^FS
+^XZ
+</code></pre>
+
+<p>Comprehensive further information can be found by these links:</p>
+
+<ul>
+<li><a href="https://www.zebra.com/content/dam/zebra/manuals/printers/common/programming/zpl-zbi2-pm-en.pdf">Programming Guide (PN: P1012728-008 Rev. A)</a></li>
+<li><a href="http://www.tracerplus.com/kb/Manuals/ZPL_Vol1.pdf">ZPL II Programming Guide (vol. I)</a></li>
+<li><a href="http://www.tracerplus.com/kb/Manuals/ZPL_Vol2.pdf">ZPL II Programming Guide (vol. II)</a></li>
+<li><a href="http://zplviewer.sourceforge.net/">ZPLViewer</a></li>
+<li><a href="http://labelary.com/viewer.html">Online ZPL Emulator</a></li>
+</ul>
+
+<p>Here&rsquo;s an example of what ZPL is capable of:</p>
+
+<p><img src="image052.png" alt="" /></p>
+
+<h2 id="toc_3">How to design a custom label</h2>
+
+<p>To make a template, you first need to design and create a label which looks just exactly like you want,
+and make sure that it gets printed correctly. The label is created and edited either directly in ZPL code,
+or using some kind of designer app.</p>
+
+<p>Heres a great tool to do it on-line:</p>
+
+<ul>
+<li><a href="http://labelary.com/viewer.html">Online ZPL Emulator</a></li>
+</ul>
+
+<p>You go there and design you label, and it looks like this:</p>
+
+<p><img src="labelary-viewer.png" alt="" /></p>
+
+<h2 id="toc_4">How to make it a template</h2>
+
+<p>After you have finished with your design or modification, you are ready to make a template of it.</p>
+
+<p>Get your ZPL code, and save it to a file, with .templ suffix. Let&rsquo;s say this was your design (a simple barcode):</p>
+
+<pre><code>^XA
+^BY5,2,270
+^FO100,550^BC^FD12345678^FS
+^XZ
+</code></pre>
+
+<p><strong>Important</strong>.
+It&rsquo;s not a template yet. To make it a template, we must reference a variable from the rpogram in it.
+The syntax for variables is this:</p>
+
+<pre><code>{{.VariableName}}
+</code></pre>
+
+<p>So, if for example the program which will use this template provides a variable called &ldquo;ItemID&rdquo;, then
+we can encode it in a template this way:</p>
+
+<pre><code>^XA
+^BY5,2,270
+^FO100,550^BC^FD{{.ItemID}}^FS
+^XZ
+</code></pre>
+
+<p><img src="bc1.png" alt="" /></p>
+
+<p>What happened? The &ldquo;12345678&rdquo; was replaced with {{.ItemID}}. From now on, the program will substitute
+that with actual ItemID.</p>
+
+<p>For example, we have 3 items, with ItemIDs equal 11111, 22222, 33333. Now, the program can generate these
+labels, from single template:</p>
+
+<pre><code>^XA
+^BY5,2,270
+^FO100,550^BC^FD11111^FS
+^XZ
+</code></pre>
+
+<p><img src="bc2.png" alt="" /></p>
+
+<pre><code>^XA
+^BY5,2,270
+^FO100,550^BC^FD22222^FS
+^XZ
+</code></pre>
+
+<p><img src="bc3.png" alt="" /></p>
+
+<pre><code>^XA
+^BY5,2,270
+^FO100,550^BC^FD33333^FS
+^XZ
+</code></pre>
+
+<p><img src="bc4.png" alt="" /></p>
+
+<p>In other words, single template is used to generate unlimited number of similar labels, with different values
+of variables:</p>
+
+<p><img src="draw3.png" alt="" /></p>
+
+<p>Finally, the program which uses the template, can provide <strong>many</strong> variables, which you can arbitrarily use
+in your custom design. For example, the program can offer this list of variables:</p>
+
+<ul>
+<li>Name</li>
+<li>FullName</li>
+<li>ShortDescription</li>
+<li>FullDescription</li>
+<li>Price</li>
+<li>Weight</li>
+<li>ManufacturingDate</li>
+<li>ExpiredBeforeDate</li>
+<li>Address</li>
+<li>Length</li>
+<li>Dimensions</li>
+<li>CAD_part_code</li>
+</ul>
+
+<p>And many many more. Then you can use them in any place of ZPL code, in any order. You are not required to use them all,
+you can use only selected ones, and you can use them multiple times in the label design.</p>
+
+<p>Exact list of variables is specific and dependent on the app that uses the template file.</p>
+
+<p>Here&rsquo;s one more example, to illustrate the principle of template:</p>
+
+<p><img src="draw4.png" alt="" /></p>
+
+<h2 id="toc_5">How the Planchet app can aggregate database fields</h2>
+
+<p>Suppose, for example, that database contains <strong>too many</strong> fields, or they&rsquo;re quite
+specific, and we want to put it into some generic label. That&rsquo;s done by field aggregation.</p>
+
+<p>The field aggregation is when we take many data fields, and concatenate them into fewer number
+of fields.</p>
+
+<p>Here&rsquo;s an example. The database table contains this row:</p>
+
+<pre><code> RowID   | Weight   | Length    | Color   | Name    | Price
+---------|----------|-----------|---------|---------|---------
+ 000123    12kg       1000mm      beige     Joint     $10
+</code></pre>
+
+<p>And our template does not have all these fields. Instead, it has a Description
+variable. So, the program can <strong>aggregate</strong> some fields, for example put
+Weight, Length, and Color, into single Description variable.</p>
+
+<p>So when you&rsquo;ll use</p>
+
+<pre><code>{{.Description}}
+</code></pre>
+
+<p>in your template, it will be substituted with the string:</p>
+
+<pre><code>&quot;Weight: 12kg, Length: 1000mm, Color: beige&quot;
+</code></pre>
+
+<p><strong>Important to understand: this aggregation is performed by program, a user has no
+power to change it.</strong> The program, though, can provide <strong>both</strong> aggregated variables,
+and original ones. So, for example, if you really need a Weight as a separate value in your design,
+you can write</p>
+
+<pre><code>{{.Weight}}
+</code></pre>
+
+<p>but if you want aggregated variable you use it instead.</p>
+
+<p>Thus, a label designer always have great flexibility in what data to use, and any combination.</p>
+
+<h2 id="toc_6">The end</h2>
