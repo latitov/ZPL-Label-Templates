@@ -197,6 +197,7 @@ but if you want aggregated variable you use it instead.
 
 Thus, a label designer always have great flexibility in what data to use, and any combination.
 
-
+![](bc5.png)
+![](bc6.png)
 
 _2019-08-26_
